@@ -46,18 +46,3 @@ All dependencies are loaded via CDN links in the HTML file, so no additional ins
 
 You can customize the appearance of the calculator by modifying the CSS variables in the `<style>` section of the HTML file. The color scheme, fonts, and layout can be adjusted to fit your preferences or to match your website's design if you're embedding this calculator.
 
-## License
-
-This Enhanced Bisection Method Calculator is open-source software licensed under the MIT license. Feel free to use, modify, and distribute it as per the terms of the license.
-
-## Contributions
-
-Contributions to improve the calculator are welcome. Please feel free to submit issues or pull requests on the project's repository.
-
-## Author
-
-[Your Name or Organization]
-
----
-
-Enjoy using the Enhanced Bisection Method Calculator for your mathematical explorations and educational purposes!
