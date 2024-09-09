@@ -1,4 +1,4 @@
-# Enhanced Bisection Method Calculator
+# Bisection Method Calculator
 
 ## Overview
 
