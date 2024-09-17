@@ -3,527 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bisection Method Calculator</title>
+    <title>Function Iteration Visualizer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --background-color: #ffffff;
-            --text-color: #333333;
-            --about-background: #f9f9f9;
-            --about-text: #333333;
-            --formula-background: #f0f0f0;
-        }
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--background-color);
-            max-width: 1200px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
         }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .sidebar {
-            flex: 1;
-            min-width: 300px;
-        }
-        .main-content {
-            flex: 2;
-            min-width: 300px;
-        }
-        h1, h2, h3 {
-            color: var(--secondary-color);
-        }
-        input, button, select {
-            margin: 10px 0;
-            padding: 8px;
+        #chart-container {
             width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        button:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        #plot {
-            width: 100%;
-            height: 500px;
-        }
-        .error {
-            color: red;
-        }
-        .success {
-            color: green;
-        }
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-        }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-        .dark-mode {
-            --primary-color: #3498db;
-            --secondary-color: #ecf0f1;
-            --background-color: #34495e;
-            --text-color: #ecf0f1;
-            --about-background: #2c3e50;
-            --about-text: #ecf0f1;
-            --formula-background: #456789;
-        }
-        .input-error {
-            border: 2px solid red;
-        }
-        .error-message {
-            color: red;
-            font-size: 0.8em;
-            margin-top: -5px;
-        }
-        @media (max-width: 600px) {
-            table {
-                font-size: 12px;
-            }
-        }
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--primary-color);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
+            max-width: 600px;
             margin: 20px auto;
-            display: none;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .about-section {
-            background-color: var(--about-background);
-            color: var(--about-text);
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        .about-section h3 {
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-        .formula {
-            background-color: var(--formula-background);
-            padding: 10px;
-            border-radius: 5px;
+        input, button {
             margin: 10px 0;
+            padding: 5px;
         }
-        .toggle-about {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-        .toggle-about:hover {
-            background-color: #34495e;
-        }
-        .hidden {
-            display: none;
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>Enhanced Bisection Method Calculator</h1>
-    
-    <div class="container">
-        <div class="sidebar">
-            <h2>Input</h2>
-            <form id="bisection-form" onsubmit="return false;">
-                <div class="tooltip">
-                    <label for="function">Enter function f(x):</label>
-                    <span class="tooltiptext">Enter a mathematical function of x, e.g., x^3 - x - 2</span>
-                </div>
-                <input type="text" id="function" name="function" placeholder="e.g., x^3 - x - 2" required>
-                <div class="error-message" id="function-error"></div>
-                
-                <div class="tooltip">
-                    <label for="a">Enter a:</label>
-                    <span class="tooltiptext">Left endpoint of the interval</span>
-                </div>
-                <input type="number" id="a" name="a" step="any" required>
-                <div class="error-message" id="a-error"></div>
-                
-                <div class="tooltip">
-                    <label for="b">Enter b:</label>
-                    <span class="tooltiptext">Right endpoint of the interval</span>
-                </div>
-                <input type="number" id="b" name="b" step="any" required>
-                <div class="error-message" id="b-error"></div>
-                
-                <div class="tooltip">
-                    <label for="iterations">Enter number of iterations:</label>
-                    <span class="tooltiptext">Maximum number of iterations to perform</span>
-                </div>
-                <input type="number" id="iterations" name="iterations" min="1" required>
-                <div class="error-message" id="iterations-error"></div>
-                
-                <button type="submit" onclick="validateAndCalculate()">Calculate</button>
-            </form>
-            <button id="step-btn" onclick="stepThrough()" disabled>Step Through</button>
-            <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
-            
-            <button class="toggle-about" onclick="toggleAbout()">Show/Hide About Section</button>
-            
-            <div class="about-section hidden" id="about-section">
-                <h2>About the Bisection Method</h2>
-                <p>The bisection method is a root-finding algorithm that repeatedly bisects an interval and then selects a subinterval in which a root must lie for further processing.</p>
-                
-                <h3>How it works:</h3>
-                <ol>
-                    <li>Start with an interval [a, b] where f(a) and f(b) have opposite signs.</li>
-                    <li>Calculate the midpoint c = (a + b) / 2.</li>
-                    <li>Evaluate f(c).</li>
-                    <li>If f(c) = 0, c is a root. If not, replace either (a, f(a)) or (b, f(b)) with (c, f(c)), so that there is a sign change between the two points.</li>
-                    <li>Repeat steps 2-4 until the interval is sufficiently small or the maximum number of iterations is reached.</li>
-                </ol>
-
-                <h3>Formula:</h3>
-                <div class="formula">
-                    \[c_n = \frac{a_n + b_n}{2}\]
-                    where \(c_n\) is the midpoint at iteration n, and \(a_n\) and \(b_n\) are the interval endpoints.
-                </div>
-
-                <h3>Convergence Rate:</h3>
-                <p>The bisection method has a linear convergence rate. The error is approximately halved in each iteration:</p>
-                <div class="formula">
-                    \[|x - c_n| \leq \frac{b - a}{2^{n+1}}\]
-                    where x is the true root, \(c_n\) is the nth approximation, and [a, b] is the initial interval.
-                </div>
-
-                <h3>Advantages:</h3>
-                <ul>
-                    <li>Simple to understand and implement</li>
-                    <li>Guaranteed to converge for continuous functions</li>
-                    <li>Robust method that always works when the initial conditions are met</li>
-                </ul>
-
-                <h3>Disadvantages:</h3>
-                <ul>
-                    <li>Relatively slow convergence compared to some other methods</li>
-                    <li>Requires that the function changes sign over the given interval</li>
-                    <li>May not find the root if the function only touches the x-axis without crossing it</li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <div id="ivt-result"></div>
-            <div class="loader" id="loading-indicator"></div>
-            
-            <table id="result-table">
-                <thead>
-                    <tr>
-                        <th>Iteration</th>
-                        <th>a</th>
-                        <th>b</th>
-                        <th>c</th>
-                        <th>f(a)</th>
-                        <th>f(b)</th>
-                        <th>f(c)</th>
-                        <th>Error</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            
-            <div id="plot"></div>
-        </div>
+    <h1>Function Iteration Visualizer</h1>
+    <label for="function">Enter function (use 'x' as variable):</label>
+    <input type="text" id="function" value="sqrt(x)" placeholder="e.g., sqrt(x)">
+    <br>
+    <label for="x-start">Starting point:</label>
+    <input type="number" id="x-start" value="0.9" step="0.1">
+    <br>
+    <label for="min-error">Minimum error:</label>
+    <input type="number" id="min-error" value="0.001" step="0.001">
+    <br>
+    <label for="max-iterations">Maximum iterations:</label>
+    <input type="number" id="max-iterations" value="10">
+    <br>
+    <button onclick="runIteration()">Run Iteration</button>
+    <div id="result"></div>
+    <div id="chart-container">
+        <canvas id="chart"></canvas>
     </div>
-    
+
     <script>
-        let results = [];
-        let currentStep = 0;
+        let chart;
 
-        function f(x) {
-            const expr = document.getElementById('function').value;
-            const scope = {x: x};
-            return math.evaluate(expr, scope);
+        function iteration(givenFunction, x0, minError = 0.001, maxIteration = 10) {
+            let i = 0;
+            let error = 1;
+            let xp = [];
+            let x = null;
+
+            while (error > minError && i < maxIteration) {
+                x = givenFunction(x0);
+                error = Math.abs(x0 - x);
+                x0 = x;
+                xp.push(x0);
+                i++;
+            }
+
+            return [x, xp];
         }
-        
-        function validateAndCalculate() {
-            if (validateForm()) {
-                showLoading();
-                setTimeout(() => {
-                    calculate();
-                    hideLoading();
-                }, 10);
-            }
-        }
 
-        function validateForm() {
-            const form = document.getElementById('bisection-form');
-            const functionInput = document.getElementById('function');
-            const aInput = document.getElementById('a');
-            const bInput = document.getElementById('b');
-            const iterationsInput = document.getElementById('iterations');
+        function createPlot(xf, xp, xStart, givenFunction) {
+            const ctx = document.getElementById('chart').getContext('2d');
 
-            let isValid = true;
-
-            // Validate function
-            try {
-                f(0);
-                functionInput.classList.remove('input-error');
-                document.getElementById('function-error').textContent = '';
-            } catch (error) {
-                functionInput.classList.add('input-error');
-                document.getElementById('function-error').textContent = 'Invalid function';
-                isValid = false;
+            if (chart) {
+                chart.destroy();
             }
 
-            // Validate a and b
-            const a = parseFloat(aInput.value);
-            const b = parseFloat(bInput.value);
+            const x = Array.from({length: 100}, (_, i) => i * 0.02);
+            const y = x.map(givenFunction);
+            const yp = xp.map(givenFunction);
 
-            if (isNaN(a)) {
-                aInput.classList.add('input-error');
-                document.getElementById('a-error').textContent = 'Invalid number';
-                isValid = false;
-            } else {
-                aInput.classList.remove('input-error');
-                document.getElementById('a-error').textContent = '';
-            }
-
-            if (isNaN(b)) {
-                bInput.classList.add('input-error');
-                document.getElementById('b-error').textContent = 'Invalid number';
-                isValid = false;
-            } else {
-                bInput.classList.remove('input-error');
-                document.getElementById('b-error').textContent = '';
-            }
-
-            if (!isNaN(a) && !isNaN(b) && a >= b) {
-                bInput.classList.add('input-error');
-                document.getElementById('b-error').textContent = 'b must be greater than a';
-                isValid = false;
-            }
-
-            // Validate iterations
-            const iterations = parseInt(iterationsInput.value);
-            if (isNaN(iterations) || iterations <= 0) {
-                iterationsInput.classList.add('input-error');
-                document.getElementById('iterations-error').textContent = 'Must be a positive integer';
-                isValid = false;
-            } else {
-                iterationsInput.classList.remove('input-error');
-                document.getElementById('iterations-error').textContent = '';
-            }
-
-            return isValid;
-        }
-        
-        function calculate() {
-            const a = parseFloat(document.getElementById('a').value);
-            const b = parseFloat(document.getElementById('b').value);
-            const iterations = parseInt(document.getElementById('iterations').value);
-            
-            // Check IVT
-            const fa = f(a);
-            const fb = f(b);
-            const ivtResult = document.getElementById('ivt-result');
-            
-            if (fa * fb >= 0) {
-                ivtResult.innerHTML = `<p class="error">According to the Intermediate Value Theorem, there may not be a root in the interval [${a}, ${b}] because f(${a}) = ${fa.toFixed(4)} and f(${b}) = ${fb.toFixed(4)} have the same sign.</p>`;
-                return;
-            } else {
-                ivtResult.innerHTML = `<p class="success">According to the Intermediate Value Theorem, there is a root in the interval [${a}, ${b}] because f(${a}) = ${fa.toFixed(4)} and f(${b}) = ${fb.toFixed(4)} have opposite signs.</p>`;
-            }
-            
-            // Bisection method
-            results = [];
-            let a_i = a;
-            let b_i = b;
-            
-            for (let i = 1; i <= iterations; i++) {
-                const c = (a_i + b_i) / 2;
-                const fa = f(a_i);
-                const fb = f(b_i);
-                const fc = f(c);
-                const error = Math.abs(b_i - a_i) / 2;
-                
-                results.push({
-                    iteration: i,
-                    a: a_i,
-                    b: b_i,
-                    c: c,
-                    fa: fa,
-                    fb: fb,
-                    fc: fc,
-                    error: error
-                });
-                
-                if (fc === 0 || error < 1e-6) {
-                    break;
-                } else if (fa * fc < 0) {
-                    b_i = c;
-                } else {
-                    a_i = c;
-                }
-            }
-            
-            updateTable();
-            updatePlot();
-            document.getElementById('step-btn').disabled = false;
-            currentStep = results.length;
-        }
-        
-        function updateTable() {
-            const tbody = document.querySelector('#result-table tbody');
-            tbody.innerHTML = '';
-            for (let i = 0; i < currentStep; i++) {
-                const row = results[i];
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${row.iteration}</td>
-                        <td>${row.a.toFixed(6)}</td>
-                        <td>${row.b.toFixed(6)}</td>
-                        <td>${row.c.toFixed(6)}</td>
-                        <td>${row.fa.toFixed(6)}</td>
-                        <td>${row.fb.toFixed(6)}</td>
-                        <td>${row.fc.toFixed(6)}</td>
-                        <td>${row.error.toFixed(6)}</td>
-                    </tr>
-                `;
-            }
-        }
-        
-        function updatePlot() {
-            const a = parseFloat(document.getElementById('a').value);
-            const b = parseFloat(document.getElementById('b').value);
-            
-            const x_range = math.range(a, b, (b - a) / 100).toArray();
-            const y_range = x_range.map(x => f(x));
-            
-            const data = [
-                {
-                    x: x_range,
-                    y: y_range,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'f(x)'
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Function',
+                            data: x.map((x, i) => ({x, y: y[i]})),
+                            showLine: true,
+                            borderColor: 'blue',
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Iteration Points',
+                            data: xp.map((x, i) => ({x, y: yp[i]})),
+                            backgroundColor: 'blue',
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Starting Point',
+                            data: [{x: xStart, y: givenFunction(xStart)}],
+                            backgroundColor: 'red',
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'Final Point',
+                            data: [{x: xf, y: givenFunction(xf)}],
+                            backgroundColor: 'green',
+                            pointRadius: 5
+                        },
+                        {
+                            label: 'y = x',
+                            data: x.map(x => ({x, y: x})),
+                            showLine: true,
+                            borderColor: 'black',
+                            borderDash: [5, 5],
+                            pointRadius: 0
+                        }
+                    ]
                 },
-                {
-                    x: [a, b],
-                    y: [0, 0],
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'x-axis',
-                    line: {color: 'red', width: 2}
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom'
+                        }
+                    }
                 }
-            ];
-            
-            for (let i = 0; i < currentStep; i++) {
-                const row = results[i];
-                data.push({
-                    x: [row.a, row.b, row.c],
-                    y: [row.fa, row.fb, row.fc],
-                    type: 'scatter',
-                    mode: 'markers',
-                    name: `Iteration ${row.iteration}`,
-                    marker: {size: 10}
-                });
-            }
-            
-            const layout = {
-                title: 'Bisection Method Visualization',
-                xaxis: {title: 'x'},
-                yaxis: {title: 'y'},
-                hovermode: 'closest'
-            };
-            
-            Plotly.newPlot('plot', data, layout);
-        }
-        
-        function stepThrough() {
-            if (currentStep > 0) {
-                currentStep--;
-                updateTable();
-                updatePlot();
-            }
-            if (currentStep === 0) {
-                document.getElementById('step-btn').disabled = true;
-            }
-        }
-        
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-        }
-        
-        function showLoading() {
-            document.getElementById('loading-indicator').style.display = 'block';
-        }
-        
-        function hideLoading() {
-            document.getElementById('loading-indicator').style.display = 'none';
+            });
         }
 
-        function toggleAbout() {
-            const aboutSection = document.getElementById('about-section');
-            aboutSection.classList.toggle('hidden');
+        function runIteration() {
+            const functionStr = document.getElementById('function').value;
+            const xStart = parseFloat(document.getElementById('x-start').value);
+            const minError = parseFloat(document.getElementById('min-error').value);
+            const maxIterations = parseInt(document.getElementById('max-iterations').value);
+
+            try {
+                const givenFunction = math.parse(functionStr).compile();
+                const func = x => givenFunction.evaluate({x: x});
+
+                const [xf, xp] = iteration(func, xStart, minError, maxIterations);
+
+                document.getElementById('result').textContent = `Final value: ${xf.toFixed(6)}`;
+                createPlot(xf, xp, xStart, func);
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
         }
     </script>
 </body>
