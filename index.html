@@ -8,41 +8,84 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
         }
-        #chart-container {
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 40px;
+        }
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .input-container label {
+            font-weight: bold;
+        }
+        .input-container input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             width: 100%;
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 300px;
         }
-        input, button {
-            margin: 10px 0;
-            padding: 5px;
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
         }
         #result {
             margin-top: 20px;
             font-weight: bold;
+            color: #333;
+        }
+        #chart-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        #tooltip {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #777;
+        }
+        @media (max-width: 600px) {
+            .input-container {
+                align-items: center;
+            }
+            .input-container input {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Function Iteration Visualizer</h1>
-    <label for="function">Enter function (use 'x' as variable):</label>
-    <input type="text" id="function" value="sqrt(x)" placeholder="e.g., sqrt(x)">
-    <br>
-    <label for="x-start">Starting point:</label>
-    <input type="number" id="x-start" value="0.9" step="0.1">
-    <br>
-    <label for="min-error">Minimum error:</label>
-    <input type="number" id="min-error" value="0.001" step="0.001">
-    <br>
-    <label for="max-iterations">Maximum iterations:</label>
-    <input type="number" id="max-iterations" value="10">
-    <br>
-    <button onclick="runIteration()">Run Iteration</button>
+    <div class="input-container">
+        <label for="function">Enter function (use 'x' as variable):</label>
+        <input type="text" id="function" value="sqrt(x)" placeholder="e.g., sqrt(x)">
+        <label for="x-start">Starting point:</label>
+        <input type="number" id="x-start" value="0.9" step="0.1">
+        <label for="min-error">Minimum error:</label>
+        <input type="number" id="min-error" value="0.001" step="0.001">
+        <label for="max-iterations">Maximum iterations:</label>
+        <input type="number" id="max-iterations" value="10">
+        <button onclick="runIteration()">Run Iteration</button>
+        <div id="tooltip">Note: The function must be written using 'x' as the variable (e.g., sqrt(x), log(x), x^2).</div>
+    </div>
     <div id="result"></div>
     <div id="chart-container">
         <canvas id="chart"></canvas>
